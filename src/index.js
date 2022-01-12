@@ -78,7 +78,7 @@ app.delete('/:id', async (req, res) => {
 
 app.put('/:id', async (req, res) => {
   await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
-  res.send({ message: 'Profile information updated.' });
+  res.send({ message: 'Profile information updated .' });
 });
 
 
