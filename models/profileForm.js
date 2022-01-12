@@ -31,8 +31,9 @@ const profileFormSchema = mongoose.Schema({
   cv: {
     type: String,
   }
-
-
+},
+{
+  timestamps: true
 })
 
 module.exports.ProfileForm = mongoose.model('ProfileForm', profileFormSchema)
