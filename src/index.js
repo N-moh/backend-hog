@@ -8,7 +8,7 @@ const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const {v4: uuidv4} = require('uuid');
 
-const { Evt } = require('../models/evt');
+const { ProfileForm } = require('../models/profileForm');
 const { User } = require('../models/user');
 
 
@@ -61,24 +61,24 @@ app.use( async (req,res,next) => {
 // defining CRUD operations
 
 app.post('/', async (req, res) => {
-  const newEvt = req.body;
-  const evt = new Evt(newEvt);
-  await evt.save();
-  res.send({ message: 'New event added.' });
+  const newProfileForm = req.body;
+  const profileForm = new ProfileForm(newProfileForm);
+  await profileForm.save();
+  res.send({ message: 'New profile information added.' });
 });
 app.get('/', async (req, res) => {
-  res.send(await Evt.find());
+  res.send(await ProfileForm.find());
 });
 
 
 app.delete('/:id', async (req, res) => {
-  await Evt.deleteOne({ _id: ObjectId(req.params.id) })
-  res.send({ message: 'Event  removed.' });
+  await ProfileForm.deleteOne({ _id: ObjectId(req.params.id) })
+  res.send({ message: 'Profile removed.' });
 });
 
 app.put('/:id', async (req, res) => {
-  await Evt.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
-  res.send({ message: 'Event updated.' });
+  await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
+  res.send({ message: 'Profile information updated.' });
 });
 
 
@@ -88,7 +88,7 @@ app.put('/:id', async (req, res) => {
 
 
 
- app.listen(port, () => {
+app.listen(port, () => {
   console.log(`listening on port ${port}`);
 });
 
