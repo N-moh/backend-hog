@@ -9,9 +9,9 @@ const mongoose = require('mongoose');
 const {v4: uuidv4} = require('uuid');
 
 const { Evt } = require('../models/evt');
-const { Cart } = require('../models/cart');
 const { User } = require('../models/user');
-const { Todo} = require('../models/todo')
+
+
 mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
 const port = process.env.PORT || 3001
 // defining the Express app
@@ -84,35 +84,11 @@ app.put('/:id', async (req, res) => {
 
 
 
-// defining CRUD operations
-app.get('/todo', async (req, res) => {
-  res.send(await Todo.find());
-});
-
-app.post('/todo', async (req, res) => {
-  const newTodo = req.body;
-  const todo = new Todo(newTodo);
-  await todo.save();
-  res.send({ message: 'New todo inserted.' });
-});
-
-app.delete('/todo/:id', async (req, res) => {
-  await Todo.deleteOne({ _id: ObjectId(req.params.id) })
-  res.send({ message: 'todo removed.' });
-});
-
-app.put('/todo/:id', async (req, res) => {
-  await Todo.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
-  res.send({ message: 'todo updated.' });
-});
 
 
 
 
-
-
-// starting the server
-app.listen(port, () => {
+ app.listen(port, () => {
   console.log(`listening on port ${port}`);
 });
 
