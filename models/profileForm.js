@@ -26,6 +26,10 @@ const profileFormSchema = mongoose.Schema({
   },
   cv: {
     type: String,
+  },
+  role: {
+    type: String,
+    default: "Participant",
   }
 },
 {
