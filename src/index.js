@@ -32,8 +32,8 @@ app.use(morgan('combined'));
 
 app.post('/auth', async (req,res) => {
   const user = await User.findOne({ username: req.body.username })
-  console.log(req.body)
-  console.log("test")
+  console.log(req.body.username)
+  console.log(req.body.password)
   if(!user) {
     return res.sendStatus(401);
   }
