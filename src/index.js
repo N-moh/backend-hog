@@ -81,7 +81,17 @@ app.put('/:id', async (req, res) => {
   res.send({ message: 'Profile information updated .' });
 });
 
-
+app.post('/tda/search', async (req, res) => {
+  const { sEmail, sFullname, } = req.body
+  const query = {}
+  if (sFullname) {
+    query.fullname = sFullname
+  }
+  if (sEmail){
+    query.email = sEmail
+  }
+  res.send(await ProfileForm.find(query).lean())
+})
 
 
 
