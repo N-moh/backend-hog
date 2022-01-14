@@ -23,7 +23,7 @@ const profileFormSchema = mongoose.Schema({
   },
   picture: {
     type: String,
-    default: "https://i.imgur.com/WiuO4Qg.png",
+    default: "https://i.imgur.com/2idphdd.png",
   },
   cv: {
     type: String,
