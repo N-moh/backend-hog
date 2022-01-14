@@ -31,7 +31,11 @@ const profileFormSchema = mongoose.Schema({
   role: {
     type: String,
     default: "Participant",
-  }
+  },
+  hired: {
+    type: Boolean,
+    default: false,
+  },
 },
 {
   timestamps: true
