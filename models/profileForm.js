@@ -34,7 +34,6 @@ const profileFormSchema = mongoose.Schema({
   },
   hired: {
     type: Boolean,
-    default: false,
   },
 },
 {
