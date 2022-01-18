@@ -10,6 +10,12 @@ const {v4: uuidv4} = require('uuid');
 
 const { ProfileForm } = require('../models/profileForm');
 const { User } = require('../models/user');
+//const { Router } = require('express');
+const { path } = require('express/lib/application');
+const multer = require("multer");
+const fs = require("fs");
+
+//app.use(express.static(__dirname+"./public/"));
 
 
 mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
@@ -58,11 +64,41 @@ app.use( async (req,res,next) => {
 })
 
 
+
 // defining CRUD operations
+
+var storage = multer.memoryStorage();
+  var uploadDisk = multer({ storage: storage });
+
+
+   app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
+    
+    fs.writeFileSync('./uploads/' + Date.now() + req.file.originalname, req.file.buffer)
+    
+  console.log(req.body)
+  //console.log(req.files.myFile);
+//req.files.myFile
+    res.json({message: "Complete"})
+   })
+
+   app.get("/user/pic/:filename", (req,res) => {
+     try
+     {
+       var path = require("path")
+    // console.log("Got Here",__dirname + '/uploads/' + req.params.filename)
+    res.sendFile(path.resolve('./uploads/' + req.params.filename))
+     }
+     catch(err){
+       console.log(err)
+     }
+    //res.end()
+
+   })
 
 app.post('/', async (req, res) => {
   const newProfileForm = req.body;
   const profileForm = new ProfileForm(newProfileForm);
+  
   await profileForm.save();
   res.send({ message: 'New profile information added.' });
 });
