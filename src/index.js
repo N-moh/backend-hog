@@ -121,13 +121,25 @@ app.put('/:id', async (req, res) => {
 });
 
 app.post('/tda/search', async (req, res) => {
-  const { sEmail, sFullname, } = req.body
+  const { sEmail, sFullname, sCourse, dateMin, dateMax } = req.body
   const query = {}
   if (sFullname) {
     query.fullname = sFullname
   }
   if (sEmail){
     query.email = sEmail
+  }
+  if(sCourse){
+    query.course = sCourse
+  }
+  if (dateMin){
+    query.date = { $gte: dateMin }
+  }
+  if (dateMax) {
+  query.date.$lte = dateMax
+  }
+  if (!dateMax && dateMin){
+    query.date={$eq:dateMin}
   }
   res.send(await ProfileForm.find(query).lean())
 })
