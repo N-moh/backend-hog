@@ -32,6 +32,12 @@ const profileFormSchema = mongoose.Schema({
   hired: {
     type: Boolean,
   },
+  course: {
+    type: String,
+  },
+  date: {
+    type: Date,
+  },
 },
 {
   timestamps: true
