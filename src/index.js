@@ -49,7 +49,7 @@ app.post('/auth', async (req,res) => {
 
   user.token = uuidv4()
   await user.save()
-  res.send({token: user.token})
+  res.send({token: user.token,role:user.role})
 
 })
 
@@ -96,6 +96,9 @@ var storage = multer.memoryStorage();
    })
 
 app.post('/', async (req, res) => {
+  const authHeader = req.headers['authorization']
+  const user = await User.findOne({token: authHeader})
+  
   const newProfileForm = req.body;
   const profileForm = new ProfileForm(newProfileForm);
   
