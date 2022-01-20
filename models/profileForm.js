@@ -23,9 +23,7 @@ const profileFormSchema = mongoose.Schema({
   },
   picture: {
     type: String,
-    
-    //default: "https://i.imgur.com/2idphdd.png",
-   // default:"http://localhost:3001/user/new/uploads/fullname"
+    default: "https://i.imgur.com/2idphdd.png",
   },
   cv: {
     type: String,
@@ -38,6 +36,9 @@ const profileFormSchema = mongoose.Schema({
   },
   date: {
     type: Date,
+  },
+  admincomments: {
+    type: String,
   },
 },
 {
