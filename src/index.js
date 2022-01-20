@@ -53,6 +53,47 @@ app.post('/auth', async (req,res) => {
 
 })
 
+
+app.get("/user/pic/:filename", (req,res) => {
+  try
+  {
+    var path = require("path")
+ // console.log("Got Here",__dirname + '/uploads/' + req.params.filename)
+ res.sendFile(path.resolve('./uploads/' + req.params.filename))
+  }
+  catch(err){
+    console.log(err)
+  }
+ //res.end()
+
+})
+{/*var storage = multer.diskStorage({
+ destination: function (req, file, cb) {
+   cb(null, './uploads/')
+ },
+ filename: function (req, file, cb) {
+   cb(null, Date.now()+file.originalname )
+ }
+});
+
+const fileFilter=(req, file, cb)=>{
+if(file.mimetype ==='image/jpeg' || file.mimetype ==='image/jpg' || file.mimetype ==='image/png'){
+    cb(null,true);
+}else{
+    cb(null, false);
+}
+
+}
+
+var upload = multer({ 
+ storage:storage,
+ limits:{
+     fileSize: 1024 * 1024 * 5
+ },
+ fileFilter:fileFilter
+});*/}
+
+
 app.use( async (req,res,next) => {
   const authHeader = req.headers['authorization']
   const user = await User.findOne({token: authHeader})
@@ -72,28 +113,17 @@ var storage = multer.memoryStorage();
 
 
    app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
-    
-    fs.writeFileSync('./uploads/' + Date.now() + req.file.originalname, req.file.buffer)
+    var savedFilename = './uploads/' + Date.now() + req.file.originalname;
+    fs.writeFileSync(savedFilename, req.file.buffer)
     
   console.log(req.body)
   //console.log(req.files.myFile);
 //req.files.myFile
-    res.json({message: "Complete"})
+    res.json({filename: savedFilename})
    })
 
-   app.get("/user/pic/:filename", (req,res) => {
-     try
-     {
-       var path = require("path")
-    // console.log("Got Here",__dirname + '/uploads/' + req.params.filename)
-    res.sendFile(path.resolve('./uploads/' + req.params.filename))
-     }
-     catch(err){
-       console.log(err)
-     }
-    //res.end()
-
-   })
+  
+   
 
 app.post('/', async (req, res) => {
   const authHeader = req.headers['authorization']
@@ -143,6 +173,29 @@ app.post('/tda/search', async (req, res) => {
   }
   res.send(await ProfileForm.find(query).lean())
 })
+
+{/*app.post("/update-profile/",upload.single('profileImage'),function(req,res,next){
+
+  var id=req.body.user_id;
+   var profilePic= req.file.path;
+   userModel.findById(id,function(err,data){
+
+    data.profileImage=profilePic?profilePic:data.profileImage;
+   
+      data.save()
+        .then(doc=>{
+           res.status(201).json({
+               message:"Profile Image Updated Successfully",
+               results:doc
+           });
+        })
+        .catch(err=>{
+            res.json(err);
+        })
+       
+   });
+
+});*/}
 
 
 
