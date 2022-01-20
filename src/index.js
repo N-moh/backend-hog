@@ -154,13 +154,13 @@ app.post('/tda/search', async (req, res) => {
   const { sEmail, sFullname, sCourse, dateMin, dateMax } = req.body
   const query = {}
   if (sFullname) {
-    query.fullname = sFullname
+    query.fullname = {$regex: sFullname,$options:'i'}
   }
   if (sEmail){
-    query.email = sEmail
+    query.email = {$regex: sEmail,$options:'i'}
   }
   if(sCourse){
-    query.course = sCourse
+    query.course = {$regex: sCourse,$options:'i'}
   }
   if (dateMin){
     query.date = { $gte: dateMin }
