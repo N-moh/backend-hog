@@ -1,4 +1,5 @@
 /// importing the dependencies
+require('dotenv').config()
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -7,21 +8,24 @@ const morgan = require('morgan');
 const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const {v4: uuidv4} = require('uuid');
-
 const { ProfileForm } = require('../models/profileForm');
 const { User } = require('../models/user');
-//const { Router } = require('express');
 const { path } = require('express/lib/application');
 const multer = require("multer");
 const fs = require("fs");
-
-//app.use(express.static(__dirname+"./public/"));
-
-
+const { S3Client, PutObjectCommand, CreateBucketCommand } = require("@aws-sdk/client-s3")
+const fileUpload = require('express-fileupload');
+const { env } = require('process');
 mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
 const port = process.env.PORT || 3001
 // defining the Express app
 const app = express();
+const s3Client = new S3Client({ region: 'eu-west-2', 
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_KEY
+  }
+ })
 
 // adding Helmet to enhance your API's security
 app.use(helmet());
@@ -34,6 +38,8 @@ app.use(cors());
 
 // adding morgan to log HTTP requests
 app.use(morgan('combined'));
+
+app.use(fileUpload());
 
 
 app.post('/auth', async (req,res) => {
@@ -58,40 +64,12 @@ app.get("/user/pic/:filename", (req,res) => {
   try
   {
     var path = require("path")
- // console.log("Got Here",__dirname + '/uploads/' + req.params.filename)
- res.sendFile(path.resolve('./uploads/' + req.params.filename))
+  res.sendFile(path.resolve('./uploads/' + req.params.filename))
   }
   catch(err){
     console.log(err)
   }
- //res.end()
-
 })
-{/*var storage = multer.diskStorage({
- destination: function (req, file, cb) {
-   cb(null, './uploads/')
- },
- filename: function (req, file, cb) {
-   cb(null, Date.now()+file.originalname )
- }
-});
-
-const fileFilter=(req, file, cb)=>{
-if(file.mimetype ==='image/jpeg' || file.mimetype ==='image/jpg' || file.mimetype ==='image/png'){
-    cb(null,true);
-}else{
-    cb(null, false);
-}
-
-}
-
-var upload = multer({ 
- storage:storage,
- limits:{
-     fileSize: 1024 * 1024 * 5
- },
- fileFilter:fileFilter
-});*/}
 
 
 app.use( async (req,res,next) => {
@@ -104,26 +82,47 @@ app.use( async (req,res,next) => {
   }
 })
 
+app.post('/imageUpload', async (req, res) => {
+  const { data, name ,size } = Object.values(req.files)[0]
+  const fileContent = Buffer.from(data, 'binary');
+  const params = {
+    Bucket: 'hoggrouppictures',
+    Key: Date.now() + "_" + name,
+    Body: fileContent,
+    ACL: 'public-read'
+  }
+  // Maybe create the bucket?
+  // try {
+  //   const bucketmaker = await s3Client.send(
+  //       new CreateBucketCommand({ Bucket: params.Bucket })
+  //   );
+  //   console.log('Created Bucket', bucketMaker)
+  // } catch (err) {
+  //   console.error('Failed to make bucket', err)
+  // }
 
+  try {
+    const result = await s3Client.send(new PutObjectCommand(params))
+    const link = `https://${params.Bucket}.s3.eu-west-2.amazonaws.com/${params.Key}`
+    res.send({ link })
+  } catch (err) {
+    console.error('Failed to store it', err)
+    res.send('FAILED, do something here')
+  }
+})
 
 // defining CRUD operations
 
 var storage = multer.memoryStorage();
-  var uploadDisk = multer({ storage: storage });
+var uploadDisk = multer({ storage: storage });
 
 
-   app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
-    var savedFilename = './uploads/' + Date.now() + req.file.originalname;
-    fs.writeFileSync(savedFilename, req.file.buffer)
-    
-  console.log(req.body)
-  //console.log(req.files.myFile);
-//req.files.myFile
-    res.json({filename: savedFilename})
-   })
+app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
+  var savedFilename = './uploads/' + Date.now() + req.file.originalname;
+  fs.writeFileSync(savedFilename, req.file.buffer)
+  res.json({filename: savedFilename})
+})
 
-  
-   
 
 app.post('/', async (req, res) => {
   const authHeader = req.headers['authorization']
@@ -173,34 +172,6 @@ app.post('/tda/search', async (req, res) => {
   }
   res.send(await ProfileForm.find(query).lean())
 })
-
-{/*app.post("/update-profile/",upload.single('profileImage'),function(req,res,next){
-
-  var id=req.body.user_id;
-   var profilePic= req.file.path;
-   userModel.findById(id,function(err,data){
-
-    data.profileImage=profilePic?profilePic:data.profileImage;
-   
-      data.save()
-        .then(doc=>{
-           res.status(201).json({
-               message:"Profile Image Updated Successfully",
-               results:doc
-           });
-        })
-        .catch(err=>{
-            res.json(err);
-        })
-       
-   });
-
-});*/}
-
-
-
-
-
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`);
