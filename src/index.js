@@ -151,10 +151,13 @@ app.put('/:id', async (req, res) => {
 });
 
 app.post('/tda/search', async (req, res) => {
-  const { sEmail, sFullname, sCourse, dateMin, dateMax } = req.body
+  const { sEmail, sFirstname, sLastname, sCourse, dateMin, dateMax } = req.body
   const query = {}
-  if (sFullname) {
-    query.fullname = {$regex: sFullname,$options:'i'}
+  if (sFirstname) {
+    query.firstname = {$regex: sFirstname,$options:'i'}
+  }
+  if (sLastname) {
+    query.lastname = {$regex: sLastname,$options:'i'}
   }
   if (sEmail){
     query.email = {$regex: sEmail,$options:'i'}
