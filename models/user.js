@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema({
   password: String,
   token: String,
   role:String,
-  profileForm:[{type: Schema.Types.ObjectId,ref:"ProfileForm"}]
+  profileForm:[{type: mongoose.Schema.Types.ObjectId,ref:"ProfileForm"}]
 },
 
 {
