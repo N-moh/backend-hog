@@ -141,6 +141,12 @@ app.get('/', async (req, res) => {
   res.send(await ProfileForm.find());
 });
 
+app.get('/newuser', async (req, res) => {
+
+  res.send(await ProfileForm.findOne({ _id: ObjectId( req.params.id)}));
+});
+
+
 
 app.delete('/:id', async (req, res) => {
   await ProfileForm.deleteOne({ _id: ObjectId(req.params.id) })
