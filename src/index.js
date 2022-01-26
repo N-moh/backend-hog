@@ -152,12 +152,16 @@ app.put('/:id', async (req, res) => {
 // Participant dashboard functions
 app.post('/participant', async (req, res) => {
   const authHeader = req.headers['authorization']
-  const user = await User.findOne({token: authHeader})
+  const user = await User.findOne({username: req.body.username})
   
   const newProfileForm = req.body;
   const profileForm = new ProfileForm(newProfileForm);
   
   await profileForm.save();
+  user.profileForm = profileForm._id;
+  
+  await user.save()
+
   res.send({ message: 'New profile information added.' });
 });
 app.put('/participant/:id', async (req, res) => {
