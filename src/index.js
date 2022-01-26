@@ -51,7 +51,7 @@ app.post('/auth', async (req,res) => {
   user.token = uuidv4()
   await user.save()
   //proF=ProfileForm.findOne({_id:user.profileForm})
-  res.send({token: user.token,role:user.role,username:user.username,profileForm:user.profileForm})
+  res.send({token: user.token,role:user.role,username:user.username,profileForm:user.profileForm[0]})
 
 })
 
