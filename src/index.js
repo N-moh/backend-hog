@@ -149,6 +149,21 @@ app.put('/:id', async (req, res) => {
   await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
   res.send({ message: 'Profile information updated .' });
 });
+// Participant dashboard functions
+app.post('/participant', async (req, res) => {
+  const authHeader = req.headers['authorization']
+  const user = await User.findOne({token: authHeader})
+  
+  const newProfileForm = req.body;
+  const profileForm = new ProfileForm(newProfileForm);
+  
+  await profileForm.save();
+  res.send({ message: 'New profile information added.' });
+});
+app.put('/participant/:id', async (req, res) => {
+  await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
+  res.send({ message: 'Profile information updated .' });
+});
 
 app.post('/tda/search', async (req, res) => {
   const { sEmail, sFirstname, sLastname, sCourse, dateMin, dateMax } = req.body
