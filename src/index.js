@@ -40,6 +40,7 @@ app.post('/auth', async (req,res) => {
   const user = await User.findOne({ username: req.body.username })
   console.log(req.body.username)
   console.log(req.body.password)
+
   if(!user) {
     return res.sendStatus(401);
   }
@@ -49,7 +50,8 @@ app.post('/auth', async (req,res) => {
 
   user.token = uuidv4()
   await user.save()
-  res.send({token: user.token,role:user.role,username:user.username})
+  //proF=ProfileForm.findOne({_id:user.profileForm})
+  res.send({token: user.token,role:user.role,username:user.username,profileForm:user.profileForm})
 
 })
 
