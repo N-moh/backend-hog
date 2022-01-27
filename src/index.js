@@ -18,7 +18,12 @@ const fs = require("fs");
 //app.use(express.static(__dirname+"./public/"));
 
 
-mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
+mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority',
+{
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true
+});
 const port = process.env.PORT || 3001
 // defining the Express app
 const app = express();
@@ -62,34 +67,7 @@ app.get("/user/pic/:filename", (req,res) => {
     console.log(err)
   }
  //res.end()
-
 })
-{/*var storage = multer.diskStorage({
- destination: function (req, file, cb) {
-   cb(null, './uploads/')
- },
- filename: function (req, file, cb) {
-   cb(null, Date.now()+file.originalname )
- }
-});
-
-const fileFilter=(req, file, cb)=>{
-if(file.mimetype ==='image/jpeg' || file.mimetype ==='image/jpg' || file.mimetype ==='image/png'){
-    cb(null,true);
-}else{
-    cb(null, false);
-}
-
-}
-
-var upload = multer({ 
- storage:storage,
- limits:{
-     fileSize: 1024 * 1024 * 5
- },
- fileFilter:fileFilter
-});*/}
-
 
 app.use( async (req,res,next) => {
   const authHeader = req.headers['authorization']
@@ -100,7 +78,6 @@ app.use( async (req,res,next) => {
     res.sendStatus(403);
   }
 })
-
 
 
 // defining CRUD operations
@@ -117,10 +94,8 @@ app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
 app.post('/', async (req, res) => {
   const authHeader = req.headers['authorization']
   const user = await User.findOne({token: authHeader})
-  
   const newProfileForm = req.body;
   const profileForm = new ProfileForm(newProfileForm);
-  
   await profileForm.save();
   res.send({ message: 'New profile information added.' });
 });
@@ -138,7 +113,16 @@ app.put('/:id', async (req, res) => {
   await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
   res.send({ message: 'Profile information updated .' });
 });
+
+// Employer dashboard functions
+
+//Pulls only NEETs for Employers to hire
+app.get('/employer', async (req, res) => {
+  res.send(await ProfileForm.find().where('hired').equals(false))
+})
+
 // Participant dashboard functions
+
 //Links post from profileform schema to user
 app.post('/participant', async (req, res) => {
   const authHeader = req.headers['authorization']
@@ -150,11 +134,13 @@ app.post('/participant', async (req, res) => {
   await user.save()
   res.send({ message: 'New profile information added.' });
 });
+
 //Updates the post linked to the user
 app.put('/participant/:id', async (req, res) => {
   await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
   res.send({ message: 'Profile information updated .' });
 });
+
 //Finds the post linked to the user
 app.get('/profile/:id', async (req, res) => {
   console.log(req.params)
@@ -166,6 +152,9 @@ app.get('/profile/:id', async (req, res) => {
   res.send(await ProfileForm.findById(query).lean())
 })
 
+//Find
+
+//Find functionality in Frontend
 app.post('/tda/search', async (req, res) => {
   const { sEmail, sFirstname, sLastname, sCourse, dateMin, dateMax } = req.body
   const query = {}
@@ -192,33 +181,6 @@ app.post('/tda/search', async (req, res) => {
   }
   res.send(await ProfileForm.find(query).lean())
 })
-
-{/*app.post("/update-profile/",upload.single('profileImage'),function(req,res,next){
-
-  var id=req.body.user_id;
-   var profilePic= req.file.path;
-   userModel.findById(id,function(err,data){
-
-    data.profileImage=profilePic?profilePic:data.profileImage;
-   
-      data.save()
-        .then(doc=>{
-           res.status(201).json({
-               message:"Profile Image Updated Successfully",
-               results:doc
-           });
-        })
-        .catch(err=>{
-            res.json(err);
-        })
-       
-   });
-
-});*/}
-
-
-
-
 
 
 app.listen(port, () => {
