@@ -17,15 +17,26 @@ const { S3Client, PutObjectCommand, CreateBucketCommand } = require("@aws-sdk/cl
 const fileUpload = require('express-fileupload');
 const { env } = require('process');
 mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
+
+//app.use(express.static(__dirname+"./public/"));
+
+
+mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority',
+{
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true
+});
 const port = process.env.PORT || 3001
 // defining the Express app
 const app = express();
+// AWS client
 const s3Client = new S3Client({ region: 'eu-west-2', 
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_KEY
   }
- })
+})
 
 // adding Helmet to enhance your API's security
 app.use(helmet());
@@ -44,18 +55,15 @@ app.use(fileUpload());
 
 app.post('/auth', async (req,res) => {
   const user = await User.findOne({ username: req.body.username })
-  console.log(req.body.username)
-  console.log(req.body.password)
   if(!user) {
     return res.sendStatus(401);
   }
   if( req.body.password !== user.password ){
     return res.sendStatus(403)
   }
-
   user.token = uuidv4()
   await user.save()
-  res.send({token: user.token,role:user.role})
+  res.send({token: user.token,role:user.role,username:user.username,profileForm:user.profileForm[0]})
 
 })
 
@@ -69,8 +77,8 @@ app.get("/user/pic/:filename", (req,res) => {
   catch(err){
     console.log(err)
   }
+ //res.end()
 })
-
 
 app.use( async (req,res,next) => {
   const authHeader = req.headers['authorization']
@@ -81,7 +89,7 @@ app.use( async (req,res,next) => {
     res.sendStatus(403);
   }
 })
-
+// AWS image upload
 app.post('/imageUpload', async (req, res) => {
   const { data, name ,size } = Object.values(req.files)[0]
   const fileContent = Buffer.from(data, 'binary');
@@ -91,23 +99,13 @@ app.post('/imageUpload', async (req, res) => {
     Body: fileContent,
     ACL: 'public-read'
   }
-  // Maybe create the bucket?
-  // try {
-  //   const bucketmaker = await s3Client.send(
-  //       new CreateBucketCommand({ Bucket: params.Bucket })
-  //   );
-  //   console.log('Created Bucket', bucketMaker)
-  // } catch (err) {
-  //   console.error('Failed to make bucket', err)
-  // }
-
   try {
     const result = await s3Client.send(new PutObjectCommand(params))
     const link = `https://${params.Bucket}.s3.eu-west-2.amazonaws.com/${params.Key}`
     res.send({ link })
   } catch (err) {
     console.error('Failed to store it', err)
-    res.send('FAILED, do something here')
+    res.send('FAILED')
   }
 })
 
@@ -127,17 +125,15 @@ app.post("/user/new", uploadDisk.single('myFile'), async (req,res) =>{
 app.post('/', async (req, res) => {
   const authHeader = req.headers['authorization']
   const user = await User.findOne({token: authHeader})
-  
   const newProfileForm = req.body;
   const profileForm = new ProfileForm(newProfileForm);
-  
   await profileForm.save();
   res.send({ message: 'New profile information added.' });
 });
+
 app.get('/', async (req, res) => {
   res.send(await ProfileForm.find());
 });
-
 
 app.delete('/:id', async (req, res) => {
   await ProfileForm.deleteOne({ _id: ObjectId(req.params.id) })
@@ -149,17 +145,61 @@ app.put('/:id', async (req, res) => {
   res.send({ message: 'Profile information updated .' });
 });
 
-app.post('/tda/search', async (req, res) => {
-  const { sEmail, sFullname, sCourse, dateMin, dateMax } = req.body
+// Employer dashboard functions
+
+//Pulls only NEETs for Employers to hire
+app.get('/employer', async (req, res) => {
+  res.send(await ProfileForm.find().where('hired').equals(false))
+})
+
+// Participant dashboard functions
+
+//Links post from profileform schema to user
+app.post('/participant', async (req, res) => {
+  const authHeader = req.headers['authorization']
+  const user = await User.findOne({username: req.body.username})
+  const newProfileForm = req.body;
+  const profileForm = new ProfileForm(newProfileForm);
+  await profileForm.save();
+  user.profileForm = profileForm._id;
+  await user.save()
+  res.send({ message: 'New profile information added.' });
+});
+
+//Updates the post linked to the user
+app.put('/participant/:id', async (req, res) => {
+  await ProfileForm.findOneAndUpdate({ _id: ObjectId(req.params.id)}, req.body )
+  res.send({ message: 'Profile information updated .' });
+});
+
+//Finds the post linked to the user
+app.get('/profile/:id', async (req, res) => {
+  console.log(req.params)
+  const {id} = req.params
   const query = {}
-  if (sFullname) {
-    query.fullname = sFullname
+  if (id){
+    query._id = id
+  }
+  res.send(await ProfileForm.findById(query).lean())
+})
+
+//Find
+
+//Find functionality in Frontend
+app.post('/tda/search', async (req, res) => {
+  const { sEmail, sFirstname, sLastname, sCourse, dateMin, dateMax } = req.body
+  const query = {}
+  if (sFirstname) {
+    query.firstname = {$regex: sFirstname,$options:'i'}
+  }
+  if (sLastname) {
+    query.lastname = {$regex: sLastname,$options:'i'}
   }
   if (sEmail){
-    query.email = sEmail
+    query.email = {$regex: sEmail,$options:'i'}
   }
   if(sCourse){
-    query.course = sCourse
+    query.course = {$regex: sCourse,$options:'i'}
   }
   if (dateMin){
     query.date = { $gte: dateMin }

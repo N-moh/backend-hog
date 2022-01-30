@@ -4,12 +4,13 @@ const userSchema = mongoose.Schema({
   username: {
     type: String,
     unique: true,
-    indexed: true,
   },
   password: String,
   token: String,
-  role:String
+  role:String,
+  profileForm:[{type: mongoose.Schema.Types.ObjectId,ref:"ProfileForm"}]
 },
+
 {
   timestamps: true  
 })
