@@ -16,11 +16,7 @@ const fs = require("fs");
 const { S3Client, PutObjectCommand, CreateBucketCommand } = require("@aws-sdk/client-s3")
 const fileUpload = require('express-fileupload');
 const { env } = require('process');
-mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority');
-
-//app.use(express.static(__dirname+"./public/"));
-
-
+// For connecting the server
 mongoose.connect('mongodb+srv://hogteam:h0gteam@clusterhog.rg30t.mongodb.net/finalteamproject?retryWrites=true&w=majority',
 {
   useNewUrlParser: true,
