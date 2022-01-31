@@ -104,7 +104,25 @@ app.post('/imageUpload', async (req, res) => {
     res.send('FAILED')
   }
 })
-
+// AWS cv upload
+app.post('/cvUpload', async (req, res) => {
+  const { data, name ,size } = Object.values(req.files)[0]
+  const fileContent = Buffer.from(data, 'binary');
+  const params = {
+    Bucket: 'hoggrouppictures',
+    Key: Date.now() + "_" + name,
+    Body: fileContent,
+    ACL: 'public-read'
+  }
+  try {
+    const result = await s3Client.send(new PutObjectCommand(params))
+    const link = `https://${params.Bucket}.s3.eu-west-2.amazonaws.com/${params.Key}`
+    res.send({ link })
+  } catch (err) {
+    console.error('Failed to store it', err)
+    res.send('FAILED')
+  }
+})
 // defining CRUD operations
 
 var storage = multer.memoryStorage();
