@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+const SkillsSchema=mongoose.Schema({name:String})
 const profileFormSchema = mongoose.Schema({
   firstname: {
     type: String,
@@ -38,6 +39,8 @@ const profileFormSchema = mongoose.Schema({
   course: {
     type: String,
   },
+  skills: [SkillsSchema],
+
   date: {
     type: Date,
   },
