@@ -64,23 +64,33 @@ app.post('/auth', async (req,res) => {
 })
 
 app.post('/signup', async (req,res) => {
-  const {username, email, password} = req.body
+  const {username, role, password, firstname, lastname, email} = req.body
   const user = await User.findOne({ username:username })
   if(user) {
     return res.sendStatus(401);
   }
- else {
-   const user= new User({
-    username,
-    email,
-    password
-  })
+  else {
+    const user= new User({
+      username,
+      role,
+      password
+    })
+    if(role == "participant"){
+    const profileForm = new ProfileForm({
+      firstname,
+      lastname,
+      email
+    })
+    await profileForm.save()
+    user.profileForm = profileForm._id;
+    user.token = uuidv4()
+    await user.save()
+    }
+  console.log(user)
   user.token = uuidv4()
   await user.save()
   res.send({message: "new user added"})
-
 }})
-
 
 app.get("/user/pic/:filename", (req,res) => {
   try
@@ -219,7 +229,7 @@ app.get('/profile/:id', async (req, res) => {
 
 //Find functionality in Frontend
 app.post('/tda/search', async (req, res) => {
-  const { sEmail, sFirstname, sLastname, sCourse, dateMin, dateMax } = req.body
+  const { sEmail, sFirstname, sLastname, sCourse, sSkills, dateMin, dateMax } = req.body
   const query = {}
   if (sFirstname) {
     query.firstname = {$regex: sFirstname,$options:'i'}
@@ -232,6 +242,9 @@ app.post('/tda/search', async (req, res) => {
   }
   if(sCourse){
     query.course = {$regex: sCourse,$options:'i'}
+  }
+  if(sSkills){
+    query.skills = {$regex: sSkills,$options:'i'}
   }
   if (dateMin){
     query.date = { $gte: dateMin }
