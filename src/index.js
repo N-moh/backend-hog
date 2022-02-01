@@ -63,6 +63,24 @@ app.post('/auth', async (req,res) => {
 
 })
 
+app.post('/signup', async (req,res) => {
+  const {username, email, password} = req.body
+  const user = await User.findOne({ username:username })
+  if(user) {
+    return res.sendStatus(401);
+  }
+ else {
+   const user= new User({
+    username,
+    email,
+    password
+  })
+  user.token = uuidv4()
+  await user.save()
+  res.send({message: "new user added"})
+
+}})
+
 
 app.get("/user/pic/:filename", (req,res) => {
   try

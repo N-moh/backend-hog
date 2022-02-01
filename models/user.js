@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
   password: String,
   token: String,
   role:String,
+  
   profileForm:[{type: mongoose.Schema.Types.ObjectId,ref:"ProfileForm"}]
 },
 
