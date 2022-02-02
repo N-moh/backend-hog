@@ -243,7 +243,7 @@ app.post('/tda/search', async (req, res) => {
   if(sCourse){
     query.course = {$regex: sCourse,$options:'i'}
   }
-  if(sSkills){
+  if(sSkills != ""){
     query.skills = {$in: sSkills}
   }
   if (dateMin){
@@ -255,6 +255,7 @@ app.post('/tda/search', async (req, res) => {
   if (!dateMax && dateMin){
     query.date={$eq:dateMin}
   }
+  console.log(query)
   res.send(await ProfileForm.find(query).lean())
 })
 
