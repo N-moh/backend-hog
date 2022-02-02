@@ -244,7 +244,7 @@ app.post('/tda/search', async (req, res) => {
     query.course = {$regex: sCourse,$options:'i'}
   }
   if(sSkills){
-    query.skills = {$regex: sSkills,$options:'i'}
+    query.skills = {$in: sSkills}
   }
   if (dateMin){
     query.date = { $gte: dateMin }

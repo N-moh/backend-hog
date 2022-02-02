@@ -42,7 +42,6 @@ const profileFormSchema = mongoose.Schema({
   skills:{
     type:Array
   },
-
   date: {
     type: Date,
   },
