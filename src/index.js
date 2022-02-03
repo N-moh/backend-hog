@@ -259,6 +259,38 @@ app.post('/tda/search', async (req, res) => {
   res.send(await ProfileForm.find(query).lean())
 })
 
+//Find functionality in employer dashboard
+app.post('/tda/empsearch', async (req, res) => {
+  const { sEmail, sFirstname, sLastname, sCourse, sSkills, dateMin, dateMax} = req.body
+  const query = {}
+  if (sFirstname) {
+    query.firstname = {$regex: sFirstname,$options:'i'}
+  }
+  if (sLastname) {
+    query.lastname = {$regex: sLastname,$options:'i'}
+  }
+  if (sEmail){
+    query.email = {$regex: sEmail,$options:'i'}
+  }
+  if(sCourse){
+    query.course = {$regex: sCourse,$options:'i'}
+  }
+  if(sSkills != ""){
+    query.skills = {$in: sSkills}
+  }
+  if (dateMin){
+    query.date = { $gte: dateMin }
+  }
+  if (dateMax) {
+  query.date.$lte = dateMax
+  }
+  if (!dateMax && dateMin){
+    query.date={$eq:dateMin}
+  }
+  console.log(query)
+  res.send(await ProfileForm.find(query).where("hired").equals(false).lean())
+})
+
 app.listen(port, () => {
   console.log(`listening on port ${port}`);
 });
