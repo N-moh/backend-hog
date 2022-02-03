@@ -151,7 +151,7 @@ app.post('/cvUpload', async (req, res) => {
     res.send('FAILED')
   }
 })
-// defining CRUD operations
+// Multer middleware
 
 var storage = multer.memoryStorage();
 var uploadDisk = multer({ storage: storage });
